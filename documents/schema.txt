@@ -1,0 +1,42 @@
+-- DDL for the database schema --
+
+CREATE TABLE companies (
+company_id INTEGER PRIMARY KEY,
+company_name TEXT,
+short_description TEXT,
+long_description TEXT,
+batch TEXT,
+status TEXT,
+tags TEXT,
+location TEXT,
+country TEXT,
+year_founded INTEGER,
+num_founders INTEGER,
+founders_names TEXT,
+team_size INTEGER,
+website TEXT,
+cb_url TEXT,
+linkedin_url TEXT
+)
+
+About Y Combinator
+Y Combinator is a startup accelerator that has invested in over 4,000 companies that have a combined valuation of over $600B. The overall goal of Y Combinator is to help startups really take off.
+
+Attributes
+Attribute Description Data Types
+company_id Company id provided by YC int
+company_name Company name string
+short_description One-line description of the company string
+long_description Long description of the company string
+batch Batch name provided by YC string
+status Company status string
+tags Industry tags list
+location Company location string
+country Company country string
+year_founded Year the company was founded int
+num_founders Number of founders int
+founders_names Full names of the founders list
+team_size Number of employees int
+website Company website string
+cb_url Company Crunchbase url string
+linkedin_url Company LinkedIn url string
