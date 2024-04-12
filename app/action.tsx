@@ -2,7 +2,7 @@ import "server-only";
 
 import { createAI, createStreamableUI, getMutableAIState } from "ai/rsc";
 
-import { runWorkersAICompletion } from "@/lib/utils";
+import { runOpenAICompletion } from "@/lib/utils";
 import { Code } from "bright";
 
 import { Chart } from "@/components/llm-charts";
@@ -12,6 +12,7 @@ import { spinner } from "@/components/ui/spinner";
 import { getContext } from "@/lib/context";
 import { nanoid } from "@/lib/utils";
 import { querySchema } from "@/lib/validation";
+import OpenAI from "openai";
 import { format as sql_format } from "sql-formatter";
 import { z } from "zod";
 import { executeD1, saveChat } from "./actions";
@@ -23,39 +24,29 @@ export interface QueryResult {
   data: Array<{ [key: string]: any }>;
 }
 
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  //   baseURL: `https://gateway.ai.cloudflare.com/v1/${process.env.CLOUDFLARE_ACCOUNT_TAG}/snowbrain/openai`,
+});
+
 async function submitUserMessage(content: string) {
   "use server";
-  const aiState = getMutableAIState();
-  const uiStream = createStreamableUI();
+  const aiState = getMutableAIState<typeof AI>();
 
-  //   aiState.update([
-  //     ...aiState.get(),
-  //     {
-  //       role: "user",
-  //       content,
-  //     },
-  //   ]);
-  aiState.update({
+  aiState.update([
     ...aiState.get(),
-    messages: [
-      ...aiState.get().messages,
-      {
-        id: nanoid(),
-        role: "user",
-        content: `${aiState.get().interactions.join("\n\n")}\n\n${content}`,
-      },
-    ],
-  });
-  const history = aiState.get().messages.map((message) => ({
-    role: message.role,
-    content: message.content,
-  }));
+    {
+      role: "user",
+      content,
+    },
+  ]);
+
   const reply = createStreamableUI(<BotCard>{spinner}</BotCard>);
 
   const getDDL = await getContext(content);
 
-  const completion = runWorkersAICompletion({
-    model: "@hf/nousresearch/hermes-2-pro-mistral-7b",
+  const completion = runOpenAICompletion(openai, {
+    model: "gpt-3.5-turbo",
     messages: [
       {
         role: "system",
@@ -67,21 +58,18 @@ async function submitUserMessage(content: string) {
         name: info.name,
       })),
     ],
+    stream: true,
+    functions: [
+      {
+        name: "query_data",
+        description:
+          "Query the data from the sqlite database and return the results.",
+        parameters: querySchema,
+      },
+    ],
+    temperature: 0,
   });
-
   completion.onTextContent((content: string, isFinal: boolean) => {
-    console.log(content);
-    aiState.update({
-      ...aiState.get(),
-      messages: [
-        ...aiState.get().messages,
-        {
-          id: nanoid(),
-          role: "assistant",
-          content: content,
-        },
-      ],
-    });
     reply.update(<BotCard>{content}</BotCard>);
     if (isFinal) {
       reply.done();
@@ -92,8 +80,6 @@ async function submitUserMessage(content: string) {
   completion.onFunctionCall(
     "query_data",
     async (input: WokersAIQueryResponse) => {
-      console.log("onFunctionCall", input);
-
       reply.update(
         <BotCard>
           <AreaSkeleton />
@@ -120,44 +106,6 @@ async function submitUserMessage(content: string) {
         columns: columns,
         data: data,
       };
-      uiStream.update(
-        <BotCard>
-          <div>
-            <Chart
-              chartType={format}
-              queryResult={compatibleQueryResult}
-              title={title}
-              timeField={timeField}
-              categories={categories}
-              index={index}
-              yaxis={yaxis}
-              size={size}
-            />
-            <div className="py-4 whitespace-pre-line">
-              <Code lang="sql" className="text-xs md:text-md">
-                {format_query}
-              </Code>
-            </div>
-          </div>
-        </BotCard>
-      );
-
-      aiState.done({
-        ...aiState.get(),
-        interactions: [],
-        messages: [
-          ...aiState.get().messages,
-          {
-            id: nanoid(),
-            role: "assistant",
-            content: `Snowflake query results for code: ${query} and chart format: ${format} with categories: ${categories}. \n\n ${input}.`,
-            display: {
-              name: "query_data",
-              props: input,
-            },
-          },
-        ],
-      });
       reply.done(
         <BotCard>
           <div>
@@ -190,11 +138,9 @@ async function submitUserMessage(content: string) {
       ]);
     }
   );
-  uiStream.done();
 
   return {
     id: nanoid(),
-    attachments: uiStream.value,
     display: reply.value,
   };
 }
@@ -211,31 +157,15 @@ const initialUIState: {
   display: React.ReactNode;
 }[] = [];
 
-export type AIState = {
-  chatId: string;
-  interactions?: string[];
-  messages: Message[];
-};
-
-export type UIState = {
-  id: string;
-  display: React.ReactNode;
-  spinner?: React.ReactNode;
-  attachments?: React.ReactNode;
-}[];
-
-export const AI = createAI<AIState, UIState>({
+export const AI = createAI({
   actions: {
     submitUserMessage,
   },
-  initialUIState: [],
-  initialAIState: { chatId: nanoid(), interactions: [], messages: [] },
+  initialUIState,
+  initialAIState,
   unstable_onSetAIState: async ({ state }) => {
     "use server";
-    const { chatId, messages } = state;
-
-    console.log(messages, chatId);
-
-    //  await saveChat(messages);
+    const lastMessage = state[state.length - 1];
+    await saveChat(lastMessage);
   },
 });

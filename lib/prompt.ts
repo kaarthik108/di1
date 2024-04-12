@@ -1,5 +1,5 @@
 export const system = `
-You are a data analytics assistant specialized in SQLITE database. You can help users with sql queries.
+You are a data analytics assistant specialized in SQLITE database. You can help users with sql queries or chat friendly with them.
 
 Function parameters for query_data:
 {

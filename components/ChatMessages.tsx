@@ -1,7 +1,6 @@
 "use client";
 
 import type { AI } from "@/app/action";
-import { Message } from "ai";
 import { useUIState } from "ai/rsc";
 import { useEffect, useRef } from "react";
 
@@ -12,7 +11,6 @@ export function ChatMessages() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-  console.log(messages);
 
   return (
     <>

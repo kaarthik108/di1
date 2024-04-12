@@ -1,31 +1,15 @@
-import { redirect } from "next/navigation";
-import { ai } from "./ai";
+import { ChatBar } from "@/components/ChatBar";
+import { ChatMessages } from "@/components/ChatMessages";
 
 export const runtime = "edge";
 
 export default async function Home() {
-  // const res = await ai.run("@hf/nousresearch/hermes-2-pro-mistral-7b", {
-  //   prompt: "What is the most complex sql ?",
-  // });
-  // const res = await ai.run("@hf/nousresearch/hermes-2-pro-mistral-7b", {
-  //   messages: [
-  //     {
-  //       role: "system",
-  //       content: `
-  //         You are a data analytics assistant specialized in SQLITE database. You can help users with sql queries
-  //       `,
-  //     },
-  //   ],
-  //   stream: true,
-  // });
-
-  // console.log(res);
-
-  // const res = await createEmbeddings("Hello, world!");
-  // console.log(res);
-  // const { results } = await db.prepare("SELECT count(*) FROM companies").all();
-
-  // console.log(results);
-
-  redirect("/chat");
+  return (
+    <div className="h-screen">
+      <div className="px-8 md:px-12 pt-20 md:pt-16 pb-32 md:pb-40 max-w-3xl mx-auto flex flex-col space-y-3 md:space-y-6 overflow-y-auto">
+        <ChatMessages />
+      </div>
+      <ChatBar />
+    </div>
+  );
 }

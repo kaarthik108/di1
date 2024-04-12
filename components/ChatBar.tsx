@@ -3,7 +3,7 @@
 import type { AI } from "@/app/action";
 import { useEnterSubmit } from "@/lib/hooks/use-enter-submit";
 import { cn, nanoid } from "@/lib/utils";
-import { useAIState, useActions, useUIState } from "ai/rsc";
+import { useActions, useUIState } from "ai/rsc";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { UserMessage } from "./message";
@@ -57,19 +57,16 @@ export function ChatBar() {
           const value = input.trim();
           setInput("");
           if (!value) return;
-          const id = nanoid();
-          // router.push(`/chat/${id}`);
-          // router.refresh();
-
           setMessages((currentMessages) => [
             ...currentMessages,
             {
-              id: id,
+              id: Date.now(),
               display: <UserMessage>{value}</UserMessage>,
             },
           ]);
           try {
             const responseMessage = await submitUserMessage(value);
+
             setMessages((currentMessages) => [
               ...currentMessages,
               responseMessage,
