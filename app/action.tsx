@@ -9,12 +9,7 @@ import {
 } from "ai/rsc";
 
 import { ChartWrapper } from "@/components/ChartWrapper";
-import {
-  BotCard,
-  BotMessage,
-  SpinnerMessage,
-  UserMessage,
-} from "@/components/message";
+import { BotCard, BotMessage, UserMessage } from "@/components/message";
 import { spinner } from "@/components/ui/spinner";
 import { getContext } from "@/lib/context";
 import { nanoid } from "@/lib/utils";
@@ -22,7 +17,7 @@ import { querySchema } from "@/lib/validation";
 import { OpenAI } from "@ai-sdk/openai";
 import { Message, experimental_streamText } from "ai";
 import { z } from "zod";
-import { Chat, executeD1, saveChat } from "./actions";
+import { Chat, saveChat } from "./actions";
 
 type WokersAIQueryResponse = z.infer<typeof querySchema>;
 function isMessage(obj: any): obj is Message {
@@ -195,9 +190,14 @@ Besides that, you can also chat with users and do some calculations if needed.
           ms.filter(isMessage).map((msg: Message) => [msg.role, msg])
         ).values()
       );
+      let title = "";
+      if (latestMessages.length > 0 && latestMessages[0].content) {
+        title = latestMessages[0].content.substring(0, 100);
+      }
+
       await saveChat({
         id,
-        title: latestMessages.map((msg) => msg.content).join("\n\n"),
+        title,
         messages: latestMessages,
         path: `/chat/${id}`,
         userId: "test",

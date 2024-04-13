@@ -209,7 +209,6 @@ export interface Chat extends Record<string, any> {
 
 export async function saveChat(chat: Chat) {
   const { id, title, userId = "defaultUserId", path, messages } = chat;
-  const createdAt = chat.createdAt ? chat.createdAt : new Date();
   const sharePath = chat.sharePath ? chat.sharePath : null;
 
   const stmt = db.prepare(
@@ -229,21 +228,25 @@ export async function saveChat(chat: Chat) {
   const messagesJson = JSON.stringify(mergedMessages);
 
   const updateQuery = `
-    INSERT INTO chats (id, title, userId, path, messages, createdAt, sharePath)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO chats (id, title, userId, path, messages, sharePath)
+    VALUES (?, ?, ?, ?, ?, ?)
     ON CONFLICT(id) DO UPDATE SET
       title = excluded.title,
       userId = excluded.userId,
       path = excluded.path,
       messages = excluded.messages,
-      createdAt = excluded.createdAt,
       sharePath = excluded.sharePath;
   `;
 
-  await db
-    .prepare(updateQuery)
-    .bind(id, title, userId, path, messagesJson, createdAt, sharePath)
-    .run();
+  try {
+    const info = await db
+      .prepare(updateQuery)
+      .bind(id, title, userId, path, messagesJson, sharePath)
+      .run();
+    console.log(info);
+  } catch (error) {
+    console.error("Error saving chat:", error);
+  }
 }
 
 export async function getChat(id: string): Promise<Chat | null> {
@@ -270,3 +273,12 @@ export async function getChat(id: string): Promise<Chat | null> {
 
   return null;
 }
+
+// {
+//     "message": [
+//       "Error: D1_TYPE_ERROR: Type 'object' not supported for value 'Sat Apr 13 2024 21:41:03 GMT+0000 (Coordinated Universal Time)'"
+//     ],
+//     "level": "error",
+//     "timestamp": 1713044463478
+//   },
+//   {
