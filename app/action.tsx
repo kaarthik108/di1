@@ -141,7 +141,7 @@ Besides that, you can also chat with users and do some calculations if needed.
             messages: [
               ...aiState.get().messages,
               {
-                id: Date.now(),
+                id: nanoid(),
                 role: "assistant",
                 content: textContent,
               },
