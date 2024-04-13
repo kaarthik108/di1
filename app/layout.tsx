@@ -28,7 +28,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={cn(sans.className, "bg-[#2b2b27] antialiased")}>
         <Navbar />
-        <AI>{children}</AI>
+        {children}
         <Footer />
       </body>
     </html>

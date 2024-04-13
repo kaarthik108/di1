@@ -19,7 +19,7 @@ interface ChartProps {
   title?: string;
   description?: string;
   timeField?: string;
-  categories: string[];
+  categories?: string[];
   index?: string;
   yaxis?: string;
   size?: string;
@@ -30,7 +30,7 @@ export function Chart({
   chartType,
   title,
   timeField,
-  categories,
+  categories = [],
   index,
   yaxis,
   size,

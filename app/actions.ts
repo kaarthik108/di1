@@ -1,6 +1,7 @@
 "use server";
 
 import { ToolDefinition } from "@/lib/tool-definition";
+import { Message } from "ai";
 import { ai } from "./ai";
 import { db } from "./bindings";
 
@@ -188,8 +189,69 @@ export async function executeD1(query: string) {
   return results;
 }
 
-export async function saveChat(chat: any) {
-  const { role, content } = chat;
-  const query = `INSERT INTO chats (role, content) VALUES (?, ?)`;
-  await db.prepare(query).bind(role, content).run();
+// export async function saveChat(chat: any) {
+//   const { role, content } = chat;
+//   const query = `INSERT INTO chats (role, content) VALUES (?, ?)`;
+//   await db.prepare(query).bind(role, content).run();
+// }
+export interface Chat extends Record<string, any> {
+  id: string;
+  title: string;
+  createdAt?: Date;
+  userId?: string;
+  path: string;
+  messages: Message[];
+  sharePath?: string;
+}
+
+export async function saveChat(chat: Chat) {
+  const { id, title, path, userId } = chat;
+
+  // Get the user message and the last assistant message from the messages array
+  const userMessage = chat.messages.find((message) => message.role === "user");
+  const lastAssistantMessage = chat.messages[chat.messages.length - 1];
+
+  // Create a new array with the user message and the last assistant message
+  const finalMessages = [userMessage, lastAssistantMessage];
+
+  const serializedMessages = JSON.stringify(finalMessages);
+
+  const insertQuery = `
+    INSERT INTO chats (id, title, path, messages, userId)
+    VALUES (?, ?, ?, ?, ?)
+    ON CONFLICT(id) DO UPDATE SET
+      title = excluded.title,
+      path = excluded.path,
+      messages = excluded.messages,
+      userId = excluded.userId
+  `;
+
+  await db
+    .prepare(insertQuery)
+    .bind(id, title, path, serializedMessages, userId)
+    .run();
+}
+export async function getChat(id: string): Promise<Chat | null> {
+  const query = `SELECT * FROM chats WHERE id = ?`;
+  const { results } = await db.prepare(query).bind(id).all();
+
+  if (results.length > 0) {
+    const { id, title, createdAt, userId, path, messages, sharePath } =
+      results[0] as Record<string, unknown>;
+
+    if (typeof messages === "string") {
+      const deserializedMessages: Message[] = JSON.parse(messages);
+      return {
+        id: id as string,
+        title: title as string,
+        createdAt: new Date(createdAt as string),
+        userId: userId as string,
+        path: path as string,
+        messages: deserializedMessages,
+        sharePath: sharePath as string,
+      };
+    }
+  }
+
+  return null;
 }

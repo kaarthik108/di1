@@ -34,10 +34,12 @@ export function BotMessage({
 
   return (
     <div className={cn("group relative flex items-start md:-ml-12", className)}>
-      <div className="bg-background flex size-[25px] shrink-0 select-none items-center justify-center rounded-lg border shadow-sm">
-        <img className="size-6" src="/images/gemini.png" alt="gemini logo" />
+      <div className="flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-md shadow-sm bg-tranparent">
+        <IconCloudflare className="text-orange-600 h-6 w-6" />
       </div>
-      <div className="ml-4 flex-1 space-y-2 overflow-hidden px-1">{text}</div>
+      <div className="ml-4 flex-1 p-4 px-4 rounded-2xl border-gray-500 bg-[#30302d] backdrop-blur-lg shadow-sm">
+        {text}
+      </div>
     </div>
   );
 }
