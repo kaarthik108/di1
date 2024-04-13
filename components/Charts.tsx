@@ -15,7 +15,7 @@ import {
 
 interface ChartProps {
   queryResult: QueryResult;
-  chartType: ChartType;
+  format: ChartType;
   title?: string;
   description?: string;
   timeField?: string;
@@ -27,7 +27,7 @@ interface ChartProps {
 
 export function Chart({
   queryResult,
-  chartType,
+  format,
   title,
   timeField,
   categories = [],
@@ -36,7 +36,7 @@ export function Chart({
   size,
 }: ChartProps) {
   try {
-    switch (chartType) {
+    switch (format) {
       case "area":
         return (
           <AreaComp
@@ -91,7 +91,7 @@ export function Chart({
         );
 
       default:
-        throw new Error(`Unsupported chart type: ${chartType}`);
+        throw new Error(`Unsupported chart type: ${format}`);
     }
   } catch (error) {
     console.error(error);

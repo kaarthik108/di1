@@ -8,11 +8,7 @@ import {
   getMutableAIState,
 } from "ai/rsc";
 
-import { runOpenAICompletion } from "@/lib/utils";
-import { Code } from "bright";
-
-import { Chart } from "@/components/llm-charts";
-import AreaSkeleton from "@/components/llm-charts/AreaSkeleton";
+import { ChartWrapper } from "@/components/ChartWrapper";
 import {
   BotCard,
   BotMessage,
@@ -25,7 +21,6 @@ import { nanoid } from "@/lib/utils";
 import { querySchema } from "@/lib/validation";
 import { OpenAI } from "@ai-sdk/openai";
 import { Message, experimental_streamText } from "ai";
-import { format as sql_format } from "sql-formatter";
 import { z } from "zod";
 import { Chat, executeD1, saveChat } from "./actions";
 
@@ -37,7 +32,7 @@ export interface QueryResult {
 }
 
 const openai = new OpenAI({
-  // baseUrl: `https://gateway.ai.cloudflare.com/v1/${process.env.CLOUDFLARE_ACCOUNT_TAG}/snowbrain/openai`,
+  baseUrl: `https://gateway.ai.cloudflare.com/v1/${process.env.CLOUDFLARE_ACCOUNT_ID}/di-1/openai`,
   apiKey: process.env.OPENAI_API_KEY,
 });
 
@@ -132,8 +127,6 @@ Besides that, you can also chat with users and do some calculations if needed.
           const { toolName, args } = delta;
 
           if (toolName === "query_data") {
-            console.log("Query data tool call", args);
-
             const {
               format,
               title,
@@ -145,36 +138,9 @@ Besides that, you can also chat with users and do some calculations if needed.
               query,
             } = args;
 
-            const format_query = sql_format(query, { language: "sql" });
-
-            const res = await executeD1(format_query);
-            const columns = Object.keys(res[0]);
-            const data = res.map((row) => Object.values(row));
-
-            const compatibleQueryResult: QueryResult = {
-              columns: columns,
-              data: data,
-            };
-
             uiStream.update(
               <BotCard>
-                <div>
-                  <Chart
-                    chartType={format}
-                    queryResult={compatibleQueryResult}
-                    title={title}
-                    timeField={timeField}
-                    categories={categories || []}
-                    index={index}
-                    yaxis={yaxis}
-                    size={size}
-                  />
-                  <div className="py-4 whitespace-pre-line">
-                    <Code lang="sql" className="text-xs md:text-md">
-                      {format_query}
-                    </Code>
-                  </div>
-                </div>
+                <ChartWrapper props={args} />
               </BotCard>
             );
 
@@ -186,7 +152,7 @@ Besides that, you can also chat with users and do some calculations if needed.
                 {
                   id: nanoid(),
                   role: "assistant",
-                  content: `[Sqlite query results for code: ${query} and chart format: ${format} with categories: ${categories} and data ${columns} ${data}]`,
+                  content: `[Sqlite query results for code: ${query} and chart format: ${format} with categories: ${categories} and data index: ${index} and yaxis: ${yaxis} and size: ${size}]`,
                   display: {
                     name: "query_data",
                     props: args,
@@ -283,14 +249,13 @@ export const AI = createAI<AIState, UIState>({
 export const getUIStateFromAIState = (aiState: Chat) => {
   return aiState.messages
     .filter((message) => message.role !== "system")
-    .map((message, index) => ({
+    .map((message: any, index) => ({
       id: `${aiState.chatId}-${index}`,
       display:
         message.role === "assistant" /** @ts-ignore */ ? (
           message.display?.name === "query_data" ? (
             <BotCard>
-              {/* @ts-ignore */}
-              <Chart {...message.display.props} />
+              <ChartWrapper props={message.display.props} />
             </BotCard>
           ) : (
             <BotMessage content={message.content} />
