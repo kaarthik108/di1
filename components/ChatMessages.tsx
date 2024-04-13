@@ -1,8 +1,7 @@
 "use client";
 
-import type { AI, UIState } from "@/app/action";
+import type { AI } from "@/app/action";
 import { useUIState } from "ai/rsc";
-import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 export interface ChatMessages {
@@ -13,13 +12,6 @@ export interface ChatMessages {
 export function ChatMessages({ isShared }: ChatMessages) {
   const [messages] = useUIState<typeof AI>();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const path = usePathname();
-
-  // useEffect(() => {
-  //   if (!path.includes("chat") && messages.length === 0) {
-  //     window.history.replaceState({}, "", `/`);
-  //   }
-  // }, [path, messages]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

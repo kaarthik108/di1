@@ -1,0 +1,6 @@
+PRAGMA foreign_keys=OFF;
+BEGIN TRANSACTION;
+
+INSERT INTO v_yc VALUES(1,'-- DDL for the database schema --CREATE TABLE companies (company_id INTEGER PRIMARY KEY,company_name TEXT,short_description TEXT,long_description TEXT,batch TEXT,status TEXT,tags TEXT,location TEXT,country TEXT,year_founded INTEGER,num_founders INTEGER,founders_names TEXT,team_size INTEGER,website TEXT,cb_url TEXT,linkedin_url TEXT)About Y CombinatorY Combinator is a startup accelerator that has invested in over 4,000 companies that have a combined valuation of over $600B. The overall goal of Y Combinator is to help startups really take off.AttributesAttribute Description Data Typescompany_id Company id provided by YC intcompany_name Company name stringshort_description One-line description of the company stringlong_description Long description of the company stringbatch Batch name provided by YC stringstatus Company status stringtags Industry tags listlocation Company location stringcountry Company country stringyear_founded Year the company was founded intnum_founders Number of founders intfounders_names Full names of the founders listteam_size Number of employees intwebsite Company website stringcb_url Company Crunchbase url stringlinkedin_url Company LinkedIn url string','a1cb00c208ce382c4e3d402ff2ed78b6');
+
+COMMIT;

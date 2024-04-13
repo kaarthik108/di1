@@ -1,8 +1,6 @@
 "use server";
 
-import { ToolDefinition } from "@/lib/tool-definition";
 import { Message } from "ai";
-import { ai } from "./ai";
 import { db } from "./bindings";
 
 export interface Vector {
@@ -189,11 +187,16 @@ export async function executeD1(query: string) {
   return results;
 }
 
-// export async function saveChat(chat: any) {
-//   const { role, content } = chat;
-//   const query = `INSERT INTO chats (role, content) VALUES (?, ?)`;
-//   await db.prepare(query).bind(role, content).run();
-// }
+export interface Chat extends Record<string, any> {
+  id: string;
+  title: string;
+  createdAt?: Date;
+  userId?: string;
+  path: string;
+  messages: Message[];
+  sharePath?: string;
+}
+
 export interface Chat extends Record<string, any> {
   id: string;
   title: string;
@@ -205,32 +208,44 @@ export interface Chat extends Record<string, any> {
 }
 
 export async function saveChat(chat: Chat) {
-  const { id, title, path, userId } = chat;
+  const { id, title, userId = "defaultUserId", path, messages } = chat;
+  const createdAt = chat.createdAt ? chat.createdAt : new Date();
+  const sharePath = chat.sharePath ? chat.sharePath : null;
 
-  // Get the user message and the last assistant message from the messages array
-  const userMessage = chat.messages.find((message) => message.role === "user");
-  const lastAssistantMessage = chat.messages[chat.messages.length - 1];
+  const stmt = db.prepare(
+    "SELECT json_extract(messages, '$') AS messages FROM chats WHERE id = ?"
+  );
+  const response = await stmt.bind(id).first();
 
-  // Create a new array with the user message and the last assistant message
-  const finalMessages = [userMessage, lastAssistantMessage];
+  let existingMessages: Message[] = [];
 
-  const serializedMessages = JSON.stringify(finalMessages);
+  if (response && response.messages) {
+    // @ts-ignore
+    existingMessages = JSON.parse(response.messages);
+  }
 
-  const insertQuery = `
-    INSERT INTO chats (id, title, path, messages, userId)
-    VALUES (?, ?, ?, ?, ?)
+  const mergedMessages: Message[] = [...existingMessages, ...messages];
+
+  const messagesJson = JSON.stringify(mergedMessages);
+
+  const updateQuery = `
+    INSERT INTO chats (id, title, userId, path, messages, createdAt, sharePath)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(id) DO UPDATE SET
       title = excluded.title,
+      userId = excluded.userId,
       path = excluded.path,
       messages = excluded.messages,
-      userId = excluded.userId
+      createdAt = excluded.createdAt,
+      sharePath = excluded.sharePath;
   `;
 
   await db
-    .prepare(insertQuery)
-    .bind(id, title, path, serializedMessages, userId)
+    .prepare(updateQuery)
+    .bind(id, title, userId, path, messagesJson, createdAt, sharePath)
     .run();
 }
+
 export async function getChat(id: string): Promise<Chat | null> {
   const query = `SELECT * FROM chats WHERE id = ?`;
   const { results } = await db.prepare(query).bind(id).all();

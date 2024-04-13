@@ -25,12 +25,23 @@ import { z } from "zod";
 import { Chat, executeD1, saveChat } from "./actions";
 
 type WokersAIQueryResponse = z.infer<typeof querySchema>;
-
+function isMessage(obj: any): obj is Message {
+  return (
+    obj &&
+    typeof obj.id === "string" &&
+    (obj.role === "user" || obj.role === "assistant") &&
+    typeof obj.content === "string"
+  );
+}
 export interface QueryResult {
   columns: string[];
   data: Array<{ [key: string]: any }>;
 }
-
+interface _Message {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+}
 const openai = new OpenAI({
   baseUrl: `https://gateway.ai.cloudflare.com/v1/${process.env.CLOUDFLARE_ACCOUNT_ID}/di-1/openai`,
   apiKey: process.env.OPENAI_API_KEY,
@@ -112,12 +123,25 @@ Besides that, you can also chat with users and do some calculations if needed.
 
           messageStream.update(<BotMessage content={textContent} />);
 
-          aiState.update({
+          // aiState.update({
+          //   ...aiState.get(),
+          //   messages: [
+          //     ...aiState.get().messages,
+          //     {
+          //       id: "1",
+          //       role: "assistant",
+          //       content: textContent,
+          //     },
+          //   ],
+          // });
+
+          aiState.done({
             ...aiState.get(),
+            interactions: [],
             messages: [
               ...aiState.get().messages,
               {
-                id: nanoid(),
+                id: Date.now(),
                 role: "assistant",
                 content: textContent,
               },
@@ -163,6 +187,21 @@ Besides that, you can also chat with users and do some calculations if needed.
           }
         }
       }
+      const ms = aiState.get().messages;
+      const id = aiState.get().chatId;
+      // @ts-ignore
+      const latestMessages: _Message[] = Array.from(
+        new Map(
+          ms.filter(isMessage).map((msg: Message) => [msg.role, msg])
+        ).values()
+      );
+      await saveChat({
+        id,
+        title: latestMessages.map((msg) => msg.content).join("\n\n"),
+        messages: latestMessages,
+        path: `/chat/${id}`,
+        userId: "test",
+      });
 
       uiStream.done();
       textStream.done();
@@ -227,22 +266,6 @@ export const AI = createAI<AIState, UIState>({
 
       return uiState;
     }
-  },
-  unstable_onSetAIState: async ({ state }) => {
-    "use server";
-
-    const { chatId, messages } = state;
-
-    const title = messages[0].content.substring(0, 100);
-    const path = `/chat/${chatId}`;
-    const chat: Chat = {
-      id: chatId,
-      title,
-      messages,
-      path,
-      userId: "test",
-    };
-    await saveChat(chat);
   },
 });
 

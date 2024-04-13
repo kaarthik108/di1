@@ -27,7 +27,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
       }}
     >
       <div className="h-screen">
-        <ChatBar id={chat.id} initialMessages={chat.messages} />
+        <ChatBar id={chat.id} />
       </div>
     </AI>
   );

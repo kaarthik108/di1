@@ -5,20 +5,20 @@ import { useEnterSubmit } from "@/lib/hooks/use-enter-submit";
 import { useLocalStorage } from "@/lib/hooks/use-local-storage";
 import { cn, nanoid } from "@/lib/utils";
 import { Message } from "ai";
-import { useAIState, useActions, useUIState } from "ai/rsc";
-import { usePathname, useRouter } from "next/navigation";
+import { useActions, useUIState } from "ai/rsc";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ChatMessages } from "./ChatMessages";
+import InitialMessages from "./InitialMessages";
 import { UserMessage } from "./message";
 import { Button } from "./ui/button";
 import { IconArrowElbow } from "./ui/icons";
 
 export interface ChatProps extends React.ComponentProps<"div"> {
-  initialMessages?: Message[];
   id?: string;
 }
 
-export function ChatBar({ id, className, initialMessages }: ChatProps) {
+export function ChatBar({ id }: ChatProps) {
   const [input, setInput] = useState("");
   const { submitUserMessage } = useActions();
   const [messages, setMessages] = useUIState<typeof AI>();
@@ -26,21 +26,12 @@ export function ChatBar({ id, className, initialMessages }: ChatProps) {
   const { formRef, onKeyDown } = useEnterSubmit();
   const [_, setNewChatId] = useLocalStorage("newChatId", id);
   const path = usePathname();
-  const [aiState] = useAIState();
-  const router = useRouter();
 
   useEffect(() => {
-    if (messages.length === 1) {
+    if (!path.includes("chat") && messages.length === 1) {
       window.history.replaceState({}, "", `/chat/${id}`);
     }
   }, [id, path, messages]);
-
-  // useEffect(() => {
-  //   const messagesLength = aiState.messages?.length;
-  //   if (messagesLength === 2) {
-  //     router.refresh();
-  //   }
-  // }, [aiState.messages, router]);
 
   useEffect(() => {
     setNewChatId(id);
@@ -140,6 +131,11 @@ export function ChatBar({ id, className, initialMessages }: ChatProps) {
             </Button>
           </div>
         </form>
+        {messages.length === 0 && (
+          <div className="max-w-xl w-full px-2 mt-4">
+            <InitialMessages />
+          </div>
+        )}
       </div>
     </div>
   );
