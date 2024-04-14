@@ -6,14 +6,27 @@ import { UserMessage } from "./message";
 
 const exampleMessages = [
   {
-    heading: "Show me the total number of companies? Number chart",
+    heading: "Number of companies founded over time. Area chart",
     subheading: "",
-    message: `Show me the total number of companies? Number chart`,
+    message: `Number of companies founded over time. Area chart`,
   },
   {
-    heading: "Who are you",
+    heading:
+      "Distribution of companies by status (e.g., active, acquired).? Donut chart",
     subheading: "",
-    message: " Who are you?",
+    message:
+      "Show me Distribution of companies by status (e.g., active, acquired).? Donut chart",
+  },
+  {
+    heading: "Give me Trend of team sizes over years as line chart",
+    subheading: "",
+    message: "Give me Trend of team sizes over years as line chart",
+  },
+  {
+    heading:
+      "Distribution of companies by status (e.g., active, acquired).? Donut chart",
+    subheading: "",
+    message: "Show me Team size of each company, listed as 'barlist' chart !",
   },
 ];
 
