@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 import type { Metadata, Viewport } from "next";
 import { Farro } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
 
 const farro = Farro({
@@ -56,7 +57,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={cn(farro.className, "bg-[#2b2b27] antialiased")}>
         <Navbar />
-        {children}
+        <Suspense fallback={<div>...</div>}>{children}</Suspense>
         <Toaster />
         <Footer />
       </body>

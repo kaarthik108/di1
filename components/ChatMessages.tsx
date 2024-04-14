@@ -28,7 +28,7 @@ export function ChatMessages({ isShared }: ChatMessages) {
             </div>
           ))
         : null}
-      <div ref={messagesEndRef} />
+      {!isShared && <div ref={messagesEndRef} />}
     </>
   );
 }

@@ -1,7 +1,7 @@
 import { AI } from "@/app/action";
 import { getChat } from "@/app/actions";
 import { ChatBar } from "@/components/ChatBar";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 
 export const runtime = "edge";
 

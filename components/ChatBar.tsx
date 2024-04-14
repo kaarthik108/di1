@@ -6,8 +6,9 @@ import { useLocalStorage } from "@/lib/hooks/use-local-storage";
 import { cn, nanoid } from "@/lib/utils";
 import { Message } from "ai";
 import { useActions, useUIState } from "ai/rsc";
+import { SendHorizontal } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ChatMessages } from "./ChatMessages";
 import InitialMessages from "./InitialMessages";
@@ -79,83 +80,94 @@ export function ChatBar({ id, isShared }: ChatProps) {
   }, [inputRef]);
 
   return (
-    <div className="px-8 md:px-12 pt-20 md:pt-16 pb-32 md:pb-40 max-w-3xl mx-auto flex flex-col space-y-3 md:space-y-6 overflow-y-auto">
-      <ChatMessages />
-      {!isShared && (
-        <div
-          className={cn(
-            messages.length === 0
-              ? "fixed bottom-1 left-0 right-0 top-10 mx-auto h-screen flex flex-col items-center justify-center"
-              : "fixed bottom-10 md:bottom-12 left-0 right-0 flex justify-center items-center mx-auto pt-2 bg-[#2b2b27] w-full z-10"
-          )}
-        >
-          <form
-            ref={formRef}
-            onSubmit={async (e) => {
-              e.preventDefault();
-              const value = input.trim();
-              setInput("");
-              if (!value) return;
-              setMessages((currentMessages) => [
-                ...currentMessages,
-                {
-                  id: nanoid(),
-                  display: <UserMessage>{value}</UserMessage>,
-                },
-              ]);
-              try {
-                const responseMessage = await submitUserMessage(value);
+    <>
+      <Suspense fallback={<div>Loading...</div>}>
+        <div className="px-8 md:px-12 pt-20 md:pt-16 pb-32 md:pb-40 max-w-3xl mx-auto flex flex-col space-y-3 md:space-y-6 overflow-y-auto">
+          <ChatMessages isShared={isShared} />
+          {!isShared && (
+            <div
+              className={cn(
+                messages.length === 0
+                  ? "fixed bottom-1 left-0 right-0 top-10 mx-auto h-screen flex flex-col items-center justify-center"
+                  : "fixed bottom-10 md:bottom-12 left-0 right-0 flex justify-center items-center mx-auto pt-2 bg-[#2b2b27] w-full z-10"
+              )}
+            >
+              <form
+                ref={formRef}
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const value = input.trim();
+                  setInput("");
+                  if (!value) return;
+                  setMessages((currentMessages) => [
+                    ...currentMessages,
+                    {
+                      id: nanoid(),
+                      display: <UserMessage>{value}</UserMessage>,
+                    },
+                  ]);
+                  try {
+                    const responseMessage = await submitUserMessage(value);
 
-                setMessages((currentMessages) => [
-                  ...currentMessages,
-                  responseMessage,
-                ]);
-              } catch (error) {
-                console.error(error);
-              }
-            }}
-            className="max-w-2xl w-full px-2"
-          >
-            <div className="relative flex items-center w-full">
-              <input
-                ref={inputRef}
-                type="text"
-                name="input"
-                autoComplete="off"
-                autoCorrect="off"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    formRef.current?.requestSubmit();
+                    setMessages((currentMessages) => [
+                      ...currentMessages,
+                      responseMessage,
+                    ]);
+                  } catch (error) {
+                    console.error(error);
                   }
                 }}
-                placeholder="Ask a question..."
-                autoFocus
-                value={input}
-                className="w-full pl-6 pr-10 h-14 rounded-full bg-[#393937] text-[#D4D4D4] focus-within:outline-none outline-none focus:ring-0 border-none backdrop-blur-lg shadow-lg"
-                onChange={(e) => {
-                  setInput(e.target.value);
-                }}
-                disabled={isInputDisabled || isShared}
-              />
-              <Button
-                type="submit"
-                size={"icon"}
-                variant={"ghost"}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white dark:text-black rounded-lg hover:bg-white/25 focus:bg-white/25 w-8 h-8 aspect-square ring-0 outline-0 bg-transparent dark:bg-white/60"
-                disabled={input.length === 0 || isInputDisabled || isShared}
+                className="max-w-2xl w-full px-2"
               >
-                <IconArrowElbow />
-              </Button>
-            </div>
-          </form>
-          {messages.length === 0 && (
-            <div className="max-w-xl w-full px-2 mt-4">
-              <InitialMessages />
+                <div className="relative flex items-center w-full">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    name="input"
+                    autoComplete="off"
+                    autoCorrect="off"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        formRef.current?.requestSubmit();
+                      }
+                    }}
+                    placeholder="Ask a question..."
+                    autoFocus={isShared ? false : true}
+                    value={input}
+                    className="w-full pl-6 pr-10 h-14 rounded-full bg-[#393937] text-[#D4D4D4] focus-within:outline-none outline-none focus:ring-0 border-none backdrop-blur-lg shadow-lg"
+                    onChange={(e) => {
+                      setInput(e.target.value);
+                    }}
+                    disabled={isInputDisabled || isShared}
+                  />
+                  <Button
+                    type="submit"
+                    size={"lg"}
+                    variant={"default"}
+                    className={cn(
+                      `flex items-center justify-center absolute right-5 top-1/2 transform -translate-y-1/2 text-white dark:text-black hover:bg-white/25 focus:bg-white/25 w-20 h-8 ring-0 outline-0 bg-[#ae5630]  rounded-xl`,
+                      input ? "px-0 w-10" : "px-4"
+                    )}
+                    disabled={input.length === 0 || isInputDisabled || isShared}
+                  >
+                    {!input ? <span className="mr-1 text-sm">Chat</span> : null}
+                    <div>
+                      <SendHorizontal className="text-white h-3 w-3" />
+                    </div>
+                  </Button>
+                </div>
+              </form>
+              {messages.length === 0 && (
+                <div className="max-w-xl w-full px-2 mt-4">
+                  {" "}
+                  <InitialMessages />
+                </div>
+              )}
             </div>
           )}
         </div>
-      )}
-    </div>
+      </Suspense>
+    </>
   );
 }
