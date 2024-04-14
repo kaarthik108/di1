@@ -61,6 +61,11 @@ export default function RootLayout({
         <Toaster />
         <Footer />
       </body>
+      <script
+        defer
+        src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon='{"token": "785a515dedfb45338b10115313dd7dad"}'
+      ></script>
     </html>
   );
 }
