@@ -38,7 +38,7 @@ interface _Message {
   content: string;
 }
 const openai = new OpenAI({
-  baseUrl: `https://gateway.ai.cloudflare.com/v1/${process.env.CLOUDFLARE_ACCOUNT_ID}/di-1/openai`,
+  baseUrl: `https://gateway.ai.cloudflare.com/v1/${process.env.CLOUDFLARE_ACCOUNT_ID}/cfd/openai`,
   apiKey: process.env.OPENAI_API_KEY,
 });
 
