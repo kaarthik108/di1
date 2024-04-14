@@ -20,7 +20,7 @@ export function AreaChartComponent({
   onSelectionChange?: (selectedData: any) => void;
 }) {
   const dataFormatter = (number: number): string =>
-    `$${Intl.NumberFormat("us").format(number)}`;
+    Intl.NumberFormat("us").format(number);
 
   if (!timeField) {
     console.error("timeField is undefined");
