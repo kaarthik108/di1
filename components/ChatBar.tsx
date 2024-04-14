@@ -26,7 +26,7 @@ export function ChatBar({ id }: ChatProps) {
   const { formRef, onKeyDown } = useEnterSubmit();
   const [_, setNewChatId] = useLocalStorage("newChatId", id);
   const path = usePathname();
-
+  const [isInputDisabled, setIsInputDisabled] = useState(false);
   useEffect(() => {
     if (!path.includes("chat") && messages.length === 1) {
       window.history.replaceState({}, "", `/chat/${id}`);
@@ -36,6 +36,14 @@ export function ChatBar({ id }: ChatProps) {
   useEffect(() => {
     setNewChatId(id);
   });
+
+  useEffect(() => {
+    if (path.includes("chat") && messages.length >= 12) {
+      setIsInputDisabled(true);
+      // Show a toast message
+      alert("You have reached the maximum message length of 12.");
+    }
+  }, [id, path, messages]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -119,13 +127,14 @@ export function ChatBar({ id }: ChatProps) {
               onChange={(e) => {
                 setInput(e.target.value);
               }}
+              disabled={isInputDisabled}
             />
             <Button
               type="submit"
               size={"icon"}
               variant={"ghost"}
               className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white dark:text-black rounded-lg hover:bg-white/25 focus:bg-white/25 w-8 h-8 aspect-square ring-0 outline-0 bg-transparent dark:bg-white/60"
-              disabled={input.length === 0}
+              disabled={input.length === 0 || isInputDisabled}
             >
               <IconArrowElbow />
             </Button>

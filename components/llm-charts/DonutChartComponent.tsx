@@ -1,6 +1,6 @@
 "use client";
 import { QueryResult } from "@/app/action";
-import { Card, DonutChart } from "@tremor/react";
+import { Card, DonutChart, DonutChartProps } from "@tremor/react";
 import { useRef } from "react";
 import { Button } from "../ui/button";
 
@@ -22,17 +22,28 @@ export function DonutChartComponent({
 
   const filteredData = queryResult.data.map((entry) => {
     const filteredEntry: { [key: string]: string | number } = {};
-
-    if (index && entry.hasOwnProperty(index)) {
-      filteredEntry[index] = entry[index];
-    }
-
-    if (category && entry.hasOwnProperty(category)) {
-      filteredEntry[category] = entry[category];
-    }
-
+    queryResult.columns.forEach((column) => {
+      filteredEntry[column] = entry[column];
+    });
     return filteredEntry;
   });
+
+  const donutChartProps: DonutChartProps = {
+    data: filteredData,
+    index: index,
+    category: category as string,
+    variant: "donut",
+    valueFormatter: dataFormatter,
+    onValueChange: (v: any) => console.log(v),
+    showAnimation: true,
+    animationDuration: 1000,
+  };
+
+  console.log("donutChartProps", donutChartProps);
+
+  console.log("index is", index);
+  console.log("category is", category);
+  console.log("filteredData is", filteredData);
 
   return (
     <>
@@ -40,17 +51,7 @@ export function DonutChartComponent({
         <p className="text-lg text-tremor-content-strong dark:text-dark-tremor-content-strong font-semibold mb-4">
           {title}
         </p>
-        <DonutChart
-          data={filteredData}
-          index={index as string}
-          category={category as string}
-          variant="donut"
-          colors={["blue", "cyan", "indigo", "violet", "fuchsia"]}
-          valueFormatter={dataFormatter}
-          onValueChange={(v) => console.log(v)}
-          showAnimation={true}
-          animationDuration={1000}
-        />
+        <DonutChart {...donutChartProps} />
       </Card>
     </>
   );

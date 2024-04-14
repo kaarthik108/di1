@@ -25,12 +25,26 @@ export async function ChartWrapper({ props }: ChartWrapperProps) {
 
   const format_query = sql_format(query, { language: "sql" });
   const res = await executeD1(format_query);
+  console.log("res", res);
+
   const columns = Object.keys(res[0]);
-  const data = res.map((row) => Object.values(row));
+  const data = res
+    .map((row) => {
+      const values = Object.values(row);
+      if (values.some((value) => value === "" || value === null)) {
+        return null;
+      }
+      return Object.fromEntries(
+        columns.map((key, index) => [key, values[index]])
+      );
+    })
+    .filter((row): row is { [key: string]: any } => row !== null);
+
   const compatibleQueryResult: QueryResult = {
     columns: columns,
     data: data,
   };
+  console.log("compatibleQueryResult", compatibleQueryResult);
 
   return (
     <div>

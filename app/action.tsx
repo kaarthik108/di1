@@ -38,7 +38,7 @@ interface _Message {
   content: string;
 }
 const openai = new OpenAI({
-  baseUrl: `https://gateway.ai.cloudflare.com/v1/${process.env.CLOUDFLARE_ACCOUNT_ID}/di-1/openai`,
+  // baseUrl: `https://gateway.ai.cloudflare.com/v1/${process.env.CLOUDFLARE_ACCOUNT_ID}/di-1/openai`,
   apiKey: process.env.OPENAI_API_KEY,
 });
 
@@ -156,6 +156,7 @@ Besides that, you can also chat with users and do some calculations if needed.
               size,
               query,
             } = args;
+            console.log("args", args);
 
             uiStream.update(
               <BotCard>
@@ -190,9 +191,10 @@ Besides that, you can also chat with users and do some calculations if needed.
           ms.filter(isMessage).map((msg: Message) => [msg.role, msg])
         ).values()
       );
+
       let title = "";
-      if (latestMessages.length > 0 && latestMessages[0].content) {
-        title = latestMessages[0].content.substring(0, 100);
+      if (ms.length > 0 && ms[0].content) {
+        title = ms[0].content.substring(0, 100);
       }
 
       await saveChat({

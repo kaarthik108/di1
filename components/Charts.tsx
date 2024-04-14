@@ -6,9 +6,11 @@ import { ChartType } from "@/lib/validation";
 import {
   AreaComp,
   BarComp,
+  BarListComp,
   DonutComp,
   LineComp,
   NumberComp,
+  ProgressComp,
   ScatterComp,
   TableComp,
 } from "./llm-charts";
@@ -89,6 +91,11 @@ export function Chart({
             category={categories[0]}
           />
         );
+      case "barlist":
+        return <BarListComp queryResult={queryResult} title={title} />;
+
+      // case "progress":
+      //   return <ProgressComp queryResult={queryResult} title={title} />;
 
       default:
         throw new Error(`Unsupported chart type: ${format}`);

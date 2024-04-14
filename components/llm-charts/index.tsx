@@ -64,12 +64,34 @@ const BarComp = dynamic(
   }
 );
 
+const BarListComp = dynamic(
+  () =>
+    import("./BarListChartComponent").then((mod) => mod.BarListChartComponent),
+  {
+    ssr: false,
+    loading: () => <AreaSkeleton />,
+  }
+);
+
+const ProgressComp = dynamic(
+  () =>
+    import("./ProgressChartComponent").then(
+      (mod) => mod.ProgressCircleComponent
+    ),
+  {
+    ssr: false,
+    loading: () => <AreaSkeleton />,
+  }
+);
+
 export {
   AreaComp,
   BarComp,
+  BarListComp,
   DonutComp,
   LineComp,
   NumberComp,
+  ProgressComp,
   ScatterComp,
   TableComp,
 };

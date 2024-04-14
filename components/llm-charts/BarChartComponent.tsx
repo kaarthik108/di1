@@ -20,23 +20,18 @@ export function BarChartComponent({
 
   const filteredData = queryResult.data.map((entry) => {
     const filteredEntry: { [key: string]: string | number } = {};
-
-    if (index) {
-      filteredEntry[index] = entry[index.toUpperCase()];
-    }
-
-    categories.forEach((category) => {
-      const upperCaseCategory = category.toUpperCase();
-      if (entry.hasOwnProperty(upperCaseCategory)) {
-        filteredEntry[category] = entry[upperCaseCategory];
+    queryResult.columns.forEach((column) => {
+      if (entry.hasOwnProperty(column)) {
+        filteredEntry[column] = entry[column];
+      } else {
+        filteredEntry[column] = 0;
       }
     });
-
     return filteredEntry;
   });
-  // console.log("index is", index);
-  // console.log("categories are", categories);
-  // console.log("filteredData is", filteredData);
+  console.log("index is", index);
+  console.log("categories are", categories);
+  console.log("filteredData is", filteredData);
 
   return (
     <>
@@ -55,6 +50,7 @@ export function BarChartComponent({
             onValueChange={(v) => console.log(v)}
             showAnimation={true}
             animationDuration={1000}
+            autoMinValue={true}
           />
         </div>
       </Card>

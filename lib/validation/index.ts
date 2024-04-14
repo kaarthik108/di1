@@ -5,6 +5,7 @@ const chartTypes = z.enum([
   "number",
   "table",
   "bar",
+  "barlist",
   "line",
   "donut",
   "scatter",
@@ -32,13 +33,13 @@ export const querySchema = z.object({
   categories: z
     .array(z.string())
     .describe(
-      "An array of strings that represent the numerical data series names to be visualized on the chart for 'area', 'bar', and 'line' charts. These should correspond to fields in the data that contain numerical values to plot."
+      "An array of strings that represent the numerical data series names to be visualized on the chart for 'area', 'bar', and 'line' charts. These should correspond to fields in the data that contain numerical values to plot. This is compulsory for 'donut' charts, where it specifies the key for the data values that define the proportions of the donut segments"
     ),
   index: z
     .string()
     .optional()
     .describe(
-      "For 'bar' and 'scatter' charts, this denotes the primary categorical axis or the x-axis labels. For time series bar charts, this can often be the same as timeField."
+      "For 'bar' and 'scatter' charts, this denotes the primary categorical axis or the x-axis labels. For time series bar charts, this can often be the same as timeField. For 'donut' charts, 'index' is required and serves as the key identifier for the data segments."
     ),
   // Fields specific to scatter chart
   category: z
