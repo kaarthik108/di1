@@ -74,7 +74,7 @@ async function submitUserMessage(content: string) {
   (async () => {
     try {
       const result = await experimental_streamText({
-        model: openai.chat("gpt-4-turbo"),
+        model: openai.chat("gpt-4o"),
         temperature: 0,
         tools: {
           query_data: {
