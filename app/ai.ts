@@ -43,10 +43,10 @@ const devAI = {
   },
 };
 
-const prodAI = () => {
-  const aiInstance = new Ai(getRequestContext().env.AI);
-  return aiInstance;
-};
+// const prodAI = () => {
+//   const aiInstance = new Ai(getRequestContext().env.AI);
+//   return aiInstance;
+// };
 
 export const ai = devAI;
 

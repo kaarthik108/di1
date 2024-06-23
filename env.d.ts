@@ -7,3 +7,13 @@ interface CloudflareEnv {
   VECTORIZE_INDEX: VectorizeIndex;
   AI: unknown;
 }
+
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      [key: string]: string | undefined;
+      DB: D1Database;
+    }
+  }
+}
+export {};
