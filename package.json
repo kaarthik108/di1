@@ -20,7 +20,7 @@
     "@radix-ui/react-slot": "^1.0.2",
     "@tremor/react": "^3.15.0",
     "@vercel/og": "^0.6.2",
-    "ai": "3.0.17",
+    "ai": "3.0.21",
     "bright": "^0.8.5",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
