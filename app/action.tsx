@@ -15,7 +15,7 @@ import { getContext } from "@/lib/context";
 import { nanoid } from "@/lib/utils";
 import { querySchema } from "@/lib/validation";
 import { OpenAI } from "@ai-sdk/openai";
-import { Message, experimental_streamText } from "ai";
+import { Message, streamText } from "ai";
 import { z } from "zod";
 import { Chat, saveChat } from "./actions";
 
@@ -73,7 +73,7 @@ async function submitUserMessage(content: string) {
 
   (async () => {
     try {
-      const result = await experimental_streamText({
+      const result = await streamText({
         model: openai.chat("gpt-4-turbo"),
         temperature: 0,
         tools: {
@@ -258,12 +258,13 @@ export const AI = createAI<AIState, UIState>({
   },
   initialUIState: [],
   initialAIState: { chatId: nanoid(), interactions: [], messages: [] },
-  unstable_onGetUIState: async () => {
+  onGetUIState: async () => {
     "use server";
 
     const aiState = getAIState();
 
     if (aiState) {
+      //@ts-ignore
       const uiState = getUIStateFromAIState(aiState);
 
       return uiState;
